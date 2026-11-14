@@ -1,92 +1,63 @@
-name: CI 
 
-on: 
+name: CI
 
-  push: 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-    branches: [ main ] 
+jobs:
+  api-checks:
+    runs-on: ubuntu-latest
 
-  pull_request: 
+    defaults:
+      run:
+        working-directory: api
 
-    branches: [ main ] 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-jobs: 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
 
-  api-checks: 
-      runs-on: ubuntu-latest 
+      - name: Install API dependencies
+        run: npm ci
 
-    defaults: 
+      - name: Run API linting
+        run: npm run lint
 
-      run: 
+      - name: Run API unit tests
+        run: npm test
 
-        working-directory: api 
+      - name: Build API Docker image
+        run: docker build -t secureapi-api .
 
-    steps: 
+  client-checks:
+    runs-on: ubuntu-latest
 
-      - name: Checkout repository 
+    defaults:
+      run:
+        working-directory: client
 
-        uses: actions/checkout@v4 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
 
-        uses: actions/setup-node@v4 
+      - name: Install client dependencies
+        run: npm ci
 
-        with: 
-
-          node-version: 22 
-
-          cache: npm 
-
-          cache-dependency-path: api/package-lock.json 
-
-      - name: Install API dependencies 
-
-        run: npm ci 
-
-      - name: Run API linting 
-
-        run: npm run lint 
-
-      - name: Run API unit tests 
-
-        run: npm test 
-
-      - name: Build API Docker image 
-
-        run: docker build -t secureapi-api . 
-          
-  client-checks: 
-
-    runs-on: ubuntu-latest 
-
-    defaults: 
-
-      run: 
-
-        working-directory: client 
-
-    steps: 
-
-      - name: Checkout repository 
-
-        uses: actions/checkout@v4 
-
-      - name: Set up Node.js 
-
-        uses: actions/setup-node@v4 
-
-        with: 
-
-          node-version: 22 
-
-          cache: npm 
-
-          cache-dependency-path: client/package-lock.json 
-
-      - name: Install client dependencies 
-
-        run: npm ci 
-
-      - name: Build client 
-
-        run: npm run build 
+      - name: Build client
+        run: npm run build
