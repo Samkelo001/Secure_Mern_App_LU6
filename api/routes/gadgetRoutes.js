@@ -1,0 +1,33 @@
+const express = require('express'); 
+
+const router = express.Router(); 
+
+const { protect, authorizeRoles } = require('../middleware/authMiddleware'); 
+
+const { 
+
+  getAllGadgets, 
+
+  getGadgetById, 
+
+  createGadget,
+  
+  updateGadget, 
+
+  deleteGadget 
+
+} = require('../controllers/gadgetController'); 
+
+const validateGadgetInput = require('../middleware/validateGadgetInput'); 
+
+router.get('/', getAllGadgets); 
+
+router.get('/:id', getGadgetById); 
+
+router.post('/', protect, validateGadgetInput, createGadget); 
+
+router.put('/:id', protect, validateGadgetInput, updateGadget); 
+
+router.delete('/:id', protect, authorizeRoles('admin'), deleteGadget); 
+
+module.exports = router; 
